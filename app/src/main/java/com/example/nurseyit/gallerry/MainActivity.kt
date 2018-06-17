@@ -19,82 +19,50 @@ import com.google.gson.Gson
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Callback
 import kotlinx.android.synthetic.main.activity_main.*
-import org.jetbrains.anko.doAsync
-import org.jetbrains.anko.toast
-import org.jetbrains.anko.uiThread
-import java.net.URL
-import org.json.JSONArray
 import kotlin.collections.ArrayList
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
 import android.widget.Toast
 import androidx.work.*
+import com.example.nurseyit.gallerry.Model.AlbomModel
+import com.example.nurseyit.gallerry.Model.PhotoModel
+import com.example.nurseyit.gallerry.Model.getAsyncAlboms
+import com.example.nurseyit.gallerry.Model.initGallaryLib
 
 class MainActivity : AppCompatActivity(), ImageGalleryAdapter.ImageThumbnailLoader, FullScreenImageGalleryAdapter.FullScreenImageLoader, AlbomsAdapter.OnItemClickInterface {
 
 
-
     var alboms: ArrayList<AlbomModel> = ArrayList()
-    lateinit var myConstraints: Constraints
-    lateinit var viewAdapter : AlbomsAdapter
-    lateinit var viewManager : LinearLayoutManager
+    var myConstraints = Constraints.Builder()
+            .setRequiredNetworkType(NetworkType.CONNECTED)
+            .build()
+    lateinit var viewAdapter: AlbomsAdapter
+    lateinit var viewManager: LinearLayoutManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
-        ImageGalleryActivity.setImageThumbnailLoader(this)
-        FullScreenImageGalleryActivity.setFullScreenImageLoader(this)
-        viewManager = LinearLayoutManager(this)
-         viewAdapter = AlbomsAdapter(alboms,this)
-        recyclerview2.apply {
-            // use this setting to improve performance if you know that changes
-            // in content do not change the layout size of the RecyclerView
-            setHasFixedSize(true)
-
-            // use a linear layout manager
-            layoutManager = viewManager
-
-            // specify an viewAdapter (see also next example)
-            adapter = viewAdapter
-
-        }
-
-        myConstraints  = Constraints.Builder()
-                .setRequiredNetworkType(NetworkType.CONNECTED)
-                .build()
-        val request = OneTimeWorkRequest.Builder(InternetAlbomWorker::class.java)
-                .setConstraints(myConstraints)
-                .build()
-
-        WorkManager.getInstance().enqueue(request)
-
-        WorkManager.getInstance()
-                .getStatusById(request.id)
-                .observe(this@MainActivity, Observer {
-                    it?.let{
-                        // Get the output data from the worker.
-
-                        // Check if the task is finished?
-                        if (it.state.isFinished) {
-                            val workerResult = it.outputData
-
-                            alboms.clear()
-                            workerResult.keyValueMap.forEach {
-                                var resAlbom = Gson().fromJson(it.value.toString(), AlbomModel::class.java)
-                                alboms.add(resAlbom)
-                            }
-                            viewAdapter.notifyDataSetChanged()
-                            Toast.makeText(this, "Work completed albom.", Toast.LENGTH_LONG)
-                                    .show()
-                        } else {
-                            Toast.makeText(this, "Work failed.albom", Toast.LENGTH_LONG)
-                                    .show()
-                        }
-                    }
-                })
+        initGallaryLib(this,this)
+        initRecycleView()
+        getAsyncAlboms(myConstraints,alboms,viewAdapter,this,this)
 
     }
 
-    private fun displayImagesInGallary(id : Int, images: ArrayList<PhotoModel> ) {
+
+
+    private fun initRecycleView() {
+        viewManager = LinearLayoutManager(this)
+        viewAdapter = AlbomsAdapter(alboms, this)
+        recyclerview2.apply {
+            setHasFixedSize(true)
+
+            layoutManager = viewManager
+
+            adapter = viewAdapter
+
+        }
+    }
+
+    private fun displayImagesInGallary(id: Int, images: ArrayList<PhotoModel>) {
         val intent = Intent(this@MainActivity, ImageGalleryActivity::class.java)
         Log.d("Main", " images =  " + images.toString())
         val bundle = Bundle()
@@ -106,8 +74,10 @@ class MainActivity : AppCompatActivity(), ImageGalleryAdapter.ImageThumbnailLoad
     }
 
     override fun onClick(albomId: Int) {
+        displayAlbomRelatedImagesInGallery(albomId)
+    }
 
-//        displayImagesInGallary(albomId)
+    private fun displayAlbomRelatedImagesInGallery(albomId: Int){
         progressBar.visibility = View.VISIBLE
         recyclerview2.visibility = View.GONE
         val request = OneTimeWorkRequest.Builder(InternetPhotoWorker::class.java)
@@ -118,33 +88,28 @@ class MainActivity : AppCompatActivity(), ImageGalleryAdapter.ImageThumbnailLoad
         WorkManager.getInstance()
                 .getStatusById(request.id)
                 .observe(this@MainActivity, Observer {
-                    var images: ArrayList<PhotoModel> = ArrayList()
+                    var imagesList: ArrayList<PhotoModel> = ArrayList()
                     it?.let {
-                        // Get the output data from the worker.
-
-                        // Check if the task is finished?
                         if (it.state.isFinished) {
                             val workerResult = it.outputData
-
-                            images.clear()
+                            imagesList.clear()
                             workerResult.keyValueMap.forEach {
-                                var resAlbom = Gson().fromJson(it.value.toString(), PhotoModel::class.java)
-                                images.add(resAlbom)
+                                var photoModel = Gson().fromJson(it.value.toString(), PhotoModel::class.java)
+                                imagesList.add(photoModel)
                             }
 
                             progressBar.visibility = View.GONE
                             recyclerview2.visibility = View.VISIBLE
-                            displayImagesInGallary(albomId,images)
+                            displayImagesInGallary(albomId, imagesList)
 
-                            Toast.makeText(this, "Work completed. images", Toast.LENGTH_LONG)
+                            Toast.makeText(this, "Work completed. imagesList", Toast.LENGTH_LONG)
                                     .show()
                         } else {
-                            Toast.makeText(this, "Work failed. images", Toast.LENGTH_LONG)
+                            Toast.makeText(this, "Work failed. imagesList", Toast.LENGTH_LONG)
                                     .show()
                         }
                     }
                 })
-
     }
 
     override fun loadImageThumbnail(iv: ImageView?, imageUrl: String?, dimension: Int) {
@@ -187,7 +152,7 @@ class MainActivity : AppCompatActivity(), ImageGalleryAdapter.ImageThumbnailLoad
     }
 }
 
-private fun  java.util.ArrayList<PhotoModel>.url(): java.util.ArrayList<String>? {
+private fun java.util.ArrayList<PhotoModel>.url(): java.util.ArrayList<String>? {
     val url = ArrayList<String>()
     this.forEach {
         url.add(it.url)

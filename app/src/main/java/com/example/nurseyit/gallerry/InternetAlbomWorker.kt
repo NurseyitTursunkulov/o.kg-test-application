@@ -10,35 +10,22 @@ import java.util.*
 
 class InternetAlbomWorker : Worker() {
 
-    // Define the parameter keys:
-    private val KEY_X_ARG = "X"
-    private val KEY_Y_ARG = "Y"
-    private val KEY_Z_ARG = "Z"
-
-    // The result key:
-    private val KEY_RESULT = "result"
-
-    /**
-     * This will be called whenever work manager run the work.
-     */
     override fun doWork(): WorkerResult {
-        var alboms = mutableMapOf<String, Any>()
-     val res =  URL("http://jsonplaceholder.typicode.com/albums").readText()
-        val arrAlboms = JSONArray(res)
-        for (i in 0 until 15) { // Walk through the Array.
-            var resAlbom = Gson().fromJson(arrAlboms.getString(i), AlbomModel::class.java)
-            var key =  i.toString()
-            alboms[key] = arrAlboms.getString(i)
-            Log.d("Worker", "resAlbom = " + resAlbom.title)
+        var albomsMap = mutableMapOf<String, Any>()
+        val response = URL("http://jsonplaceholder.typicode.com/albums").readText()
+        val jsonArrayAlboms = JSONArray(response)
+        for (i in 0 until 15) {
+            var key = i.toString()
+            albomsMap[key] = jsonArrayAlboms.getString(i)
         }
 
 
         val output = Data.Builder()
-                .putAll(alboms)
+                .putAll(albomsMap)
                 .build()
 
         outputData = output
-        // Indicate success or failure with your return value.
+
         return WorkerResult.SUCCESS
     }
 }
