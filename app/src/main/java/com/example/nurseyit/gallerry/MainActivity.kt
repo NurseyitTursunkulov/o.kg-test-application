@@ -1,10 +1,10 @@
 package com.example.nurseyit.gallerry
 
+import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.graphics.drawable.BitmapDrawable
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.support.annotation.UiThread
 import android.support.v7.graphics.Palette
 import android.text.TextUtils
 import android.util.Log
@@ -27,19 +27,23 @@ import org.json.JSONArray
 import kotlin.collections.ArrayList
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
+import android.widget.Toast
+import androidx.work.*
 
 class MainActivity : AppCompatActivity(), ImageGalleryAdapter.ImageThumbnailLoader, FullScreenImageGalleryAdapter.FullScreenImageLoader, AlbomsAdapter.OnItemClickInterface {
 
 
-    var images: ArrayList<PhotoModel> = ArrayList()
+
     var alboms: ArrayList<AlbomModel> = ArrayList()
+    lateinit var myConstraints: Constraints
     lateinit var viewAdapter : AlbomsAdapter
+    lateinit var viewManager : LinearLayoutManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         ImageGalleryActivity.setImageThumbnailLoader(this)
         FullScreenImageGalleryActivity.setFullScreenImageLoader(this)
-        var viewManager = LinearLayoutManager(this)
+        viewManager = LinearLayoutManager(this)
          viewAdapter = AlbomsAdapter(alboms,this)
         recyclerview2.apply {
             // use this setting to improve performance if you know that changes
@@ -54,41 +58,43 @@ class MainActivity : AppCompatActivity(), ImageGalleryAdapter.ImageThumbnailLoad
 
         }
 
-        doAsync {
-            Log.d("Main", "start")
-            val resultPhotos = URL("http://jsonplaceholder.typicode.com/photos").readText()
+        myConstraints  = Constraints.Builder()
+                .setRequiredNetworkType(NetworkType.CONNECTED)
+                .build()
+        val request = OneTimeWorkRequest.Builder(InternetAlbomWorker::class.java)
+                .setConstraints(myConstraints)
+                .build()
 
-            val arrPhoto = JSONArray(resultPhotos)
-            for (i in 0 until 15) { // Walk through the Array.
-                var resPhoto = Gson().fromJson(arrPhoto.getString(i), PhotoModel::class.java)
-                images.add(resPhoto)
-                Log.d("Main", "resTitle = " + resPhoto.title)
-            }
+        WorkManager.getInstance().enqueue(request)
 
-            uiThread {
-                toast("ready")
-            }
-        }
+        WorkManager.getInstance()
+                .getStatusById(request.id)
+                .observe(this@MainActivity, Observer {
+                    it?.let{
+                        // Get the output data from the worker.
 
-        doAsync {
-            Log.d("Main", "start")
-            val resultAlboms = URL("http://jsonplaceholder.typicode.com/albums").readText()
+                        // Check if the task is finished?
+                        if (it.state.isFinished) {
+                            val workerResult = it.outputData
 
-            val arrAlboms = JSONArray(resultAlboms)
-            for (i in 0 until 15) { // Walk through the Array.
-                var resAlbom = Gson().fromJson(arrAlboms.getString(i), AlbomModel::class.java)
-                alboms.add(resAlbom)
-                Log.d("Main", "resAlbom = " + resAlbom.title)
-            }
+                            alboms.clear()
+                            workerResult.keyValueMap.forEach {
+                                var resAlbom = Gson().fromJson(it.value.toString(), AlbomModel::class.java)
+                                alboms.add(resAlbom)
+                            }
+                            viewAdapter.notifyDataSetChanged()
+                            Toast.makeText(this, "Work completed albom.", Toast.LENGTH_LONG)
+                                    .show()
+                        } else {
+                            Toast.makeText(this, "Work failed.albom", Toast.LENGTH_LONG)
+                                    .show()
+                        }
+                    }
+                })
 
-            uiThread {
-                toast("ready")
-                viewAdapter.notifyDataSetChanged()
-            }
-        }
     }
 
-    private fun displayImagesInGallary(id : Int) {
+    private fun displayImagesInGallary(id : Int, images: ArrayList<PhotoModel> ) {
         val intent = Intent(this@MainActivity, ImageGalleryActivity::class.java)
         Log.d("Main", " images =  " + images.toString())
         val bundle = Bundle()
@@ -102,25 +108,42 @@ class MainActivity : AppCompatActivity(), ImageGalleryAdapter.ImageThumbnailLoad
     override fun onClick(albomId: Int) {
 
 //        displayImagesInGallary(albomId)
-
-        doAsync {
-            val resultPhotos = URL("http://jsonplaceholder.typicode.com/photos").readText()
-
-            val arrPhoto = JSONArray(resultPhotos)
-            for (i in 0 until 15) { // Walk through the Array.
-                var resPhoto = Gson().fromJson(arrPhoto.getString(i), PhotoModel::class.java)
-                images.add(resPhoto)
-                Log.d("Main", "resTitle = " + resPhoto.title)
-            }
-
-            uiThread {
-                toast("ready")
-                progressBar.visibility = View.GONE
-                displayImagesInGallary(albomId)
-            }
-        }
         progressBar.visibility = View.VISIBLE
-        val par = recyclerview2.layoutParams
+        recyclerview2.visibility = View.GONE
+        val request = OneTimeWorkRequest.Builder(InternetPhotoWorker::class.java)
+                .setConstraints(myConstraints)
+                .build()
+        WorkManager.getInstance().enqueue(request)
+
+        WorkManager.getInstance()
+                .getStatusById(request.id)
+                .observe(this@MainActivity, Observer {
+                    var images: ArrayList<PhotoModel> = ArrayList()
+                    it?.let {
+                        // Get the output data from the worker.
+
+                        // Check if the task is finished?
+                        if (it.state.isFinished) {
+                            val workerResult = it.outputData
+
+                            images.clear()
+                            workerResult.keyValueMap.forEach {
+                                var resAlbom = Gson().fromJson(it.value.toString(), PhotoModel::class.java)
+                                images.add(resAlbom)
+                            }
+
+                            progressBar.visibility = View.GONE
+                            recyclerview2.visibility = View.VISIBLE
+                            displayImagesInGallary(albomId,images)
+
+                            Toast.makeText(this, "Work completed. images", Toast.LENGTH_LONG)
+                                    .show()
+                        } else {
+                            Toast.makeText(this, "Work failed. images", Toast.LENGTH_LONG)
+                                    .show()
+                        }
+                    }
+                })
 
     }
 
