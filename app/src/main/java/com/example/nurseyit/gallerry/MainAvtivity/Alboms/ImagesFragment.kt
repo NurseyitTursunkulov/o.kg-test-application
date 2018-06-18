@@ -21,7 +21,7 @@ import com.example.nurseyit.gallerry.Model.AlbomModel.AlbomsAdapter
 import com.example.nurseyit.gallerry.Model.AlbomModel.PhotoModel
 import com.example.nurseyit.gallerry.Model.AlbomModel.RepositoryImpl
 import com.example.nurseyit.gallerry.Presenter.AlbomPresenter.AlbomContract
-import com.example.nurseyit.gallerry.Presenter.AlbomPresenter.PresenterImpl
+import com.example.nurseyit.gallerry.Presenter.AlbomPresenter.AlbomContractImpl
 
 import com.example.nurseyit.gallerry.R
 import com.squareup.picasso.Callback
@@ -29,7 +29,7 @@ import com.squareup.picasso.Picasso
 import kotlinx.android.synthetic.main.fragment_blank.*
 
 
-class BlankFragment : Fragment(), ImageGalleryAdapter.ImageThumbnailLoader,
+class ImagesFragment : Fragment(), ImageGalleryAdapter.ImageThumbnailLoader,
         FullScreenImageGalleryAdapter.FullScreenImageLoader,
         AlbomsAdapter.OnItemClickInterface, AlbomContract.View {
 
@@ -40,7 +40,7 @@ class BlankFragment : Fragment(), ImageGalleryAdapter.ImageThumbnailLoader,
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ownerInstance.lifecycleOwner = this
-        presenter = PresenterImpl(this, RepositoryImpl())
+        presenter = AlbomContractImpl(this, RepositoryImpl())
         initGallaryLib(this, this)
 
 
@@ -61,7 +61,7 @@ class BlankFragment : Fragment(), ImageGalleryAdapter.ImageThumbnailLoader,
     companion object {
         @JvmStatic
         fun newInstance() =
-                BlankFragment()
+                ImagesFragment()
     }
 
     private fun initRecycleView() {

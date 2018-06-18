@@ -1,6 +1,6 @@
 package com.example.nurseyit.gallerry.Model.AlbomModel
 
-interface Model {
+interface AlbomModelContract {
     fun getAlbomFromServer(callBack : LoadAlbomCallBack)
     fun getPhotoFromServer(id :Int, callBack: LoadPhotoCallBack) : List<PhotoModel>?
 

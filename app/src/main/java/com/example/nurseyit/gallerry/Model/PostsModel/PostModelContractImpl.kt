@@ -1,17 +1,19 @@
-package com.example.nurseyit.gallerry.Model.AlbomModel
+package com.example.nurseyit.gallerry.Model.PostsModel
 
 import android.arch.lifecycle.Observer
 import android.util.Log
 import androidx.work.*
-import com.example.nurseyit.gallerry.MainAvtivity.Alboms.ownerInstance.lifecycleOwner
+import com.example.nurseyit.gallerry.MainAvtivity.Alboms.ownerInstance
+import com.example.nurseyit.gallerry.Model.AlbomModel.*
 import com.google.gson.Gson
 
-class RepositoryImpl : AlbomModelContract {
-    override fun getAlbomFromServer(callBack : AlbomModelContract.LoadAlbomCallBack) {
+
+class PostModelContractImpl : PostModelContract {
+    override fun getPostFromServer(callBack: PostModelContract.LoadPostCallBack) {
         var myConstraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()
-        val request = OneTimeWorkRequest.Builder(BackgroundInternetAlbomWorker::class.java)
+        val request = OneTimeWorkRequest.Builder(BackgroundInternetPostWorker::class.java)
                 .setConstraints(myConstraints)
                 .build()
 
@@ -19,17 +21,17 @@ class RepositoryImpl : AlbomModelContract {
 
         WorkManager.getInstance()
                 .getStatusById(request.id)
-                .observe(lifecycleOwner, Observer {
+                .observe(ownerInstance.lifecycleOwner, Observer {
                     it?.let {
-                        var alboms: ArrayList<AlbomModel> = ArrayList()
+                        var postsList: ArrayList<PostModel> = ArrayList()
                         if (it.state.isFinished) {
                             val workerResult = it.outputData
 
                             workerResult.keyValueMap.forEach {
-                                var resAlbom = Gson().fromJson(it.value.toString(), AlbomModel::class.java)
-                                alboms.add(resAlbom)
+                                var resAlbom = Gson().fromJson(it.value.toString(), PostModel::class.java)
+                                postsList.add(resAlbom)
                             }
-                            callBack.onAlbomsLoaded(alboms)
+                            callBack.onPostLoaded(postsList)
 
 
                         } else {
@@ -38,17 +40,16 @@ class RepositoryImpl : AlbomModelContract {
                         }
                     }
                 })
-
     }
 
-    override fun getPhotoFromServer(id: Int, callBack: AlbomModelContract.LoadPhotoCallBack): List<PhotoModel>? {
+    override fun getCommentFromServer(id: Int, callBack: PostModelContract.LoadCommentsCallBack): List<CommentModel>? {
         var netWorkConstraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)
                 .build()
         val input = Data.Builder()
-                .putInt("photoId", id)
+                .putInt("postId", id)
                 .build()
-        val request = OneTimeWorkRequest.Builder(BackgroundInternetPhotoWorker::class.java)
+        val request = OneTimeWorkRequest.Builder(BackgroundInternetCommentsWorker::class.java)
                 .setConstraints(netWorkConstraints)
                 .setInputData(input)
                 .build()
@@ -56,17 +57,17 @@ class RepositoryImpl : AlbomModelContract {
 
         WorkManager.getInstance()
                 .getStatusById(request.id)
-                .observe(lifecycleOwner, Observer {
-                    var imagesList: ArrayList<PhotoModel> = ArrayList()
+                .observe(ownerInstance.lifecycleOwner, Observer {
+                    var commentsList: ArrayList<CommentModel> = ArrayList()
                     it?.let {
                         if (it.state.isFinished) {
                             val workerResult = it.outputData
-                            imagesList.clear()
+                            commentsList.clear()
                             workerResult.keyValueMap.forEach {
-                                var photoModel = Gson().fromJson(it.value.toString(), PhotoModel::class.java)
-                                imagesList.add(photoModel)
+                                var commentModel = Gson().fromJson(it.value.toString(), CommentModel::class.java)
+                                commentsList.add(commentModel)
                             }
-                            callBack.onPhotoLoaded(imagesList)
+                            callBack.onCommentsLoaded(commentsList)
 
                         } else {
                             callBack.onPhotoNotAvailable()

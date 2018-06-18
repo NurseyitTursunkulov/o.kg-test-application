@@ -34,6 +34,7 @@
             android:name=".AlbomsActivity"
             android:label="@string/title_activity_alboms"
             android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".MainAvtivity.Posts.CommentsActivity"></activity>
     </application>
 
 </manifest>

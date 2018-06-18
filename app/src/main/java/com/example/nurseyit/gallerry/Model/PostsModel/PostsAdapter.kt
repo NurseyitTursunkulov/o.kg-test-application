@@ -1,17 +1,16 @@
-package com.example.nurseyit.gallerry.Model.AlbomModel
+package com.example.nurseyit.gallerry.Model.PostsModel
 
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import com.example.nurseyit.gallerry.R
-import kotlinx.android.synthetic.main.albomitem.view.*
+import kotlinx.android.synthetic.main.postitem.view.*
 
-
-class AlbomsAdapter(val onclick: OnItemClickInterface) :
-        RecyclerView.Adapter<AlbomsAdapter.ViewHolder>() {
-    var myDataset: ArrayList<AlbomModel> = ArrayList()
-    class ViewHolder(val view: View, onCustomclick: OnItemClickInterface, myDataset: ArrayList<AlbomModel>) :
+class PostsAdapter(val onclick: OnItemClickInterface) :
+        RecyclerView.Adapter<PostsAdapter.ViewHolder>() {
+    var myDataset: ArrayList<PostModel> = ArrayList()
+    class ViewHolder(val view: View, onCustomclick: OnItemClickInterface, myDataset: ArrayList<PostModel>) :
             RecyclerView.ViewHolder(view) {
         init {
             view.setOnClickListener {
@@ -23,13 +22,14 @@ class AlbomsAdapter(val onclick: OnItemClickInterface) :
         val idTextView = view.idTextView
         val userIdTextView = view.postIdTextView
         val titleTextView = view.nameTextView
+        val bodyTextView = view.bodyTextView
 
     }
 
     override fun onCreateViewHolder(parent: ViewGroup,
                                     viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
-                .inflate(R.layout.albomitem, parent, false)
+                .inflate(R.layout.postitem, parent, false)
 
         return ViewHolder(view, onclick, myDataset)
     }
@@ -38,6 +38,7 @@ class AlbomsAdapter(val onclick: OnItemClickInterface) :
         holder.idTextView.text = "id = " + myDataset[position].id.toString()
         holder.userIdTextView.text = "userId = " + myDataset[position].userId.toString()
         holder.titleTextView.text = myDataset[position].title
+        holder.bodyTextView.text = myDataset[position].body
 
     }
 
