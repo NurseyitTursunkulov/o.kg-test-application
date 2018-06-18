@@ -1,5 +1,6 @@
 package com.example.nurseyit.gallerry
 
+import android.arch.lifecycle.LifecycleOwner
 import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.graphics.drawable.BitmapDrawable
@@ -28,6 +29,7 @@ import com.example.nurseyit.gallerry.Model.AlbomModel
 import com.example.nurseyit.gallerry.Model.PhotoModel
 import com.example.nurseyit.gallerry.Model.getAsyncAlboms
 import com.example.nurseyit.gallerry.Model.initGallaryLib
+import com.example.nurseyit.gallerry.ownerInstance.lifecycleOwner
 
 class MainActivity : AppCompatActivity(), ImageGalleryAdapter.ImageThumbnailLoader, FullScreenImageGalleryAdapter.FullScreenImageLoader, AlbomsAdapter.OnItemClickInterface {
 
@@ -41,6 +43,7 @@ class MainActivity : AppCompatActivity(), ImageGalleryAdapter.ImageThumbnailLoad
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        lifecycleOwner = this
         initGallaryLib(this,this)
         initRecycleView()
         getAsyncAlboms(myConstraints,alboms,viewAdapter,this,this)
