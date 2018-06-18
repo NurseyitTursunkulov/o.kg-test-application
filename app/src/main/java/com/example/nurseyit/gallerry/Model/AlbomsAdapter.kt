@@ -1,16 +1,17 @@
-package com.example.nurseyit.gallerry
+package com.example.nurseyit.gallerry.Model
 
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import com.example.nurseyit.gallerry.Model.AlbomModel
+import com.example.nurseyit.gallerry.R
 import kotlinx.android.synthetic.main.albomitem.view.*
 
 
-class AlbomsAdapter(var myDataset: ArrayList<AlbomModel>, val onclick: OnItemClickInterface) :
+class AlbomsAdapter(val onclick: OnItemClickInterface) :
         RecyclerView.Adapter<AlbomsAdapter.ViewHolder>() {
-    class ViewHolder(val view: View, onCustomclick: OnItemClickInterface,myDataset: ArrayList<AlbomModel>) :
+    var myDataset: ArrayList<AlbomModel> = ArrayList()
+    class ViewHolder(val view: View, onCustomclick: OnItemClickInterface, myDataset: ArrayList<AlbomModel>) :
             RecyclerView.ViewHolder(view) {
         init {
             view.setOnClickListener {
@@ -26,11 +27,11 @@ class AlbomsAdapter(var myDataset: ArrayList<AlbomModel>, val onclick: OnItemCli
     }
 
     override fun onCreateViewHolder(parent: ViewGroup,
-                                    viewType: Int): AlbomsAdapter.ViewHolder {
+                                    viewType: Int): ViewHolder {
         val view = LayoutInflater.from(parent.context)
                 .inflate(R.layout.albomitem, parent, false)
 
-        return ViewHolder(view, onclick,myDataset)
+        return ViewHolder(view, onclick, myDataset)
     }
 
     override fun onBindViewHolder(holder: ViewHolder, position: Int) {

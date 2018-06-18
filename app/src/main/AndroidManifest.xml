@@ -18,7 +18,7 @@
             android:label=""
             android:theme="@style/Theme.ImageGallery" />
         <activity
-            android:name=".MainActivity"
+            android:name=".MainAvtivity.MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

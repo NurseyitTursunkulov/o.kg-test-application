@@ -1,4 +1,4 @@
-package com.example.nurseyit.gallerry
+package com.example.nurseyit.gallerry.Presenter
 
 import com.example.nurseyit.gallerry.Model.AlbomModel
 import com.example.nurseyit.gallerry.Model.PhotoModel
@@ -8,6 +8,7 @@ interface AlbomContract {
         fun showAlbom(listAlbom: List<AlbomModel>)
         fun showGallary(photoList: List<PhotoModel>)
         fun showProgressBar()
+        fun closeProgressBar()
     }
 
     interface Presenter {

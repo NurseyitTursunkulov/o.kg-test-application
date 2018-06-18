@@ -4,20 +4,27 @@ package com.example.nurseyit.gallerry
 import android.util.Log
 import androidx.work.Data
 import androidx.work.Worker
+import com.example.nurseyit.gallerry.Model.PhotoModel
 import com.google.gson.Gson
 import org.json.JSONArray
 import java.net.URL
 import java.util.*
 
-class InternetPhotoWorker : Worker() {
+class BackgroundInternetPhotoWorker : Worker() {
 
     override fun doWork(): WorkerResult {
         var photos = mutableMapOf<String, Any>()
+       var id = inputData.getInt("photoId",0)
         val res =  URL("http://jsonplaceholder.typicode.com/photos").readText()
         val arrAlboms = JSONArray(res)
-        for (i in 0 until 15) {
-            var key =  i.toString()
-            photos[key] = arrAlboms.getString(i)
+        for (i in 0 until arrAlboms.length()) {
+            var photoModel = Gson().fromJson(arrAlboms.getString(i), PhotoModel::class.java)
+            if (photoModel.albumId == id){
+                var key =  i.toString()
+                photos[key] = arrAlboms.getString(i)
+                if (photos.size >= 15) break
+            }
+
         }
 
         val output = Data.Builder()

@@ -1,7 +1,5 @@
-package com.example.nurseyit.gallerry
+package com.example.nurseyit.gallerry.MainAvtivity
 
-import android.arch.lifecycle.LifecycleOwner
-import android.arch.lifecycle.Observer
 import android.content.Intent
 import android.graphics.drawable.BitmapDrawable
 import android.support.v7.app.AppCompatActivity
@@ -12,41 +10,39 @@ import android.util.Log
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
-import com.etiennelawlor.imagegallery.library.activities.FullScreenImageGalleryActivity
 import com.etiennelawlor.imagegallery.library.activities.ImageGalleryActivity
 import com.etiennelawlor.imagegallery.library.adapters.FullScreenImageGalleryAdapter
 import com.etiennelawlor.imagegallery.library.adapters.ImageGalleryAdapter
-import com.google.gson.Gson
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Callback
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.collections.ArrayList
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
-import android.widget.Toast
-import androidx.work.*
-import com.example.nurseyit.gallerry.Model.AlbomModel
-import com.example.nurseyit.gallerry.Model.PhotoModel
-import com.example.nurseyit.gallerry.Model.getAsyncAlboms
-import com.example.nurseyit.gallerry.Model.initGallaryLib
-import com.example.nurseyit.gallerry.ownerInstance.lifecycleOwner
+import com.example.nurseyit.gallerry.Presenter.AlbomContract
+import com.example.nurseyit.gallerry.Model.AlbomsAdapter
+import com.example.nurseyit.gallerry.Model.*
+import com.example.nurseyit.gallerry.Presenter.PresenterImpl
+import com.example.nurseyit.gallerry.R
+import com.example.nurseyit.gallerry.MainAvtivity.ownerInstance.lifecycleOwner
 
-class MainActivity : AppCompatActivity(), ImageGalleryAdapter.ImageThumbnailLoader, FullScreenImageGalleryAdapter.FullScreenImageLoader, AlbomsAdapter.OnItemClickInterface {
+class MainActivity : AppCompatActivity(), ImageGalleryAdapter.ImageThumbnailLoader,
+        FullScreenImageGalleryAdapter.FullScreenImageLoader,
+        AlbomsAdapter.OnItemClickInterface, AlbomContract.View {
+
+    lateinit var presenter: AlbomContract.Presenter
 
 
-    var alboms: ArrayList<AlbomModel> = ArrayList()
-    var myConstraints = Constraints.Builder()
-            .setRequiredNetworkType(NetworkType.CONNECTED)
-            .build()
     lateinit var viewAdapter: AlbomsAdapter
     lateinit var viewManager: LinearLayoutManager
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         lifecycleOwner = this
-        initGallaryLib(this,this)
+        presenter = PresenterImpl(this, RepositoryImpl())
+        initGallaryLib(this, this)
         initRecycleView()
-        getAsyncAlboms(myConstraints,alboms,viewAdapter,this,this)
+        presenter.loadAlbom()
 
     }
 
@@ -54,7 +50,7 @@ class MainActivity : AppCompatActivity(), ImageGalleryAdapter.ImageThumbnailLoad
 
     private fun initRecycleView() {
         viewManager = LinearLayoutManager(this)
-        viewAdapter = AlbomsAdapter(alboms, this)
+        viewAdapter = AlbomsAdapter(this)
         recyclerview2.apply {
             setHasFixedSize(true)
 
@@ -65,7 +61,7 @@ class MainActivity : AppCompatActivity(), ImageGalleryAdapter.ImageThumbnailLoad
         }
     }
 
-    private fun displayImagesInGallary(id: Int, images: ArrayList<PhotoModel>) {
+    private fun displayImagesInGallary( images: ArrayList<PhotoModel>) {
         val intent = Intent(this@MainActivity, ImageGalleryActivity::class.java)
         Log.d("Main", " images =  " + images.toString())
         val bundle = Bundle()
@@ -77,43 +73,29 @@ class MainActivity : AppCompatActivity(), ImageGalleryAdapter.ImageThumbnailLoad
     }
 
     override fun onClick(albomId: Int) {
-        displayAlbomRelatedImagesInGallery(albomId)
+        presenter.loadImagesToGallary(albomId)
     }
 
-    private fun displayAlbomRelatedImagesInGallery(albomId: Int){
+
+    override fun showAlbom(listAlbom: List<AlbomModel>) {
+        viewAdapter.myDataset = listAlbom as ArrayList<AlbomModel>
+        viewAdapter.notifyDataSetChanged()
+    }
+
+    override fun showGallary(photoList: List<PhotoModel>) {
+        displayImagesInGallary(photoList as ArrayList<PhotoModel>)
+    }
+
+    override fun showProgressBar() {
         progressBar.visibility = View.VISIBLE
         recyclerview2.visibility = View.GONE
-        val request = OneTimeWorkRequest.Builder(InternetPhotoWorker::class.java)
-                .setConstraints(myConstraints)
-                .build()
-        WorkManager.getInstance().enqueue(request)
-
-        WorkManager.getInstance()
-                .getStatusById(request.id)
-                .observe(this@MainActivity, Observer {
-                    var imagesList: ArrayList<PhotoModel> = ArrayList()
-                    it?.let {
-                        if (it.state.isFinished) {
-                            val workerResult = it.outputData
-                            imagesList.clear()
-                            workerResult.keyValueMap.forEach {
-                                var photoModel = Gson().fromJson(it.value.toString(), PhotoModel::class.java)
-                                imagesList.add(photoModel)
-                            }
-
-                            progressBar.visibility = View.GONE
-                            recyclerview2.visibility = View.VISIBLE
-                            displayImagesInGallary(albomId, imagesList)
-
-                            Toast.makeText(this, "Work completed. imagesList", Toast.LENGTH_LONG)
-                                    .show()
-                        } else {
-                            Toast.makeText(this, "Work failed. imagesList", Toast.LENGTH_LONG)
-                                    .show()
-                        }
-                    }
-                })
     }
+
+    override fun closeProgressBar() {
+        progressBar.visibility = View.GONE
+        recyclerview2.visibility = View.VISIBLE
+    }
+
 
     override fun loadImageThumbnail(iv: ImageView?, imageUrl: String?, dimension: Int) {
         if (!TextUtils.isEmpty(imageUrl)) {
