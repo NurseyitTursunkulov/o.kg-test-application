@@ -33,7 +33,7 @@
         <activity
             android:name=".AlbomsActivity"
             android:label="@string/title_activity_alboms"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
     </application>
 
 </manifest>

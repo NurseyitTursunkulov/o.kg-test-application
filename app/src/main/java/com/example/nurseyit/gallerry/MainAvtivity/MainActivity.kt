@@ -4,6 +4,8 @@ import android.content.Intent
 import android.graphics.drawable.BitmapDrawable
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
+import android.support.design.widget.BottomNavigationView
+import android.support.v4.app.Fragment
 import android.support.v7.graphics.Palette
 import android.text.TextUtils
 import android.util.Log
@@ -15,7 +17,6 @@ import com.etiennelawlor.imagegallery.library.adapters.FullScreenImageGalleryAda
 import com.etiennelawlor.imagegallery.library.adapters.ImageGalleryAdapter
 import com.squareup.picasso.Picasso
 import com.squareup.picasso.Callback
-import kotlinx.android.synthetic.main.activity_main.*
 import kotlin.collections.ArrayList
 import android.support.v7.widget.LinearLayoutManager
 import android.view.View
@@ -25,122 +26,36 @@ import com.example.nurseyit.gallerry.Model.*
 import com.example.nurseyit.gallerry.Presenter.PresenterImpl
 import com.example.nurseyit.gallerry.R
 import com.example.nurseyit.gallerry.MainAvtivity.ownerInstance.lifecycleOwner
+import kotlinx.android.synthetic.main.activity_main2.*
 
-class MainActivity : AppCompatActivity(), ImageGalleryAdapter.ImageThumbnailLoader,
-        FullScreenImageGalleryAdapter.FullScreenImageLoader,
-        AlbomsAdapter.OnItemClickInterface, AlbomContract.View {
+class MainActivity :AppCompatActivity() {
 
-    lateinit var presenter: AlbomContract.Presenter
+    private val mOnNavigationItemSelectedListener = BottomNavigationView.OnNavigationItemSelectedListener { item ->
+        when (item.itemId) {
+            R.id.navigation_home -> {
+                val albumsFragment = BlankFragment.newInstance()
+                openFragment(albumsFragment)
+                return@OnNavigationItemSelectedListener true
+            }
+            R.id.navigation_dashboard -> {
 
+                return@OnNavigationItemSelectedListener true
+            }
 
-    lateinit var viewAdapter: AlbomsAdapter
+        }
+        false
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        lifecycleOwner = this
-        presenter = PresenterImpl(this, RepositoryImpl())
-        initGallaryLib(this, this)
-        initRecycleView()
-        presenter.loadAlbom()
+        setContentView(R.layout.activity_main2)
 
+        navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener)
     }
-
-
-
-    private fun initRecycleView() {
-       val viewManager = LinearLayoutManager(this)
-        viewAdapter = AlbomsAdapter(this)
-        recyclerview2.apply {
-            setHasFixedSize(true)
-
-            layoutManager = viewManager
-
-            adapter = viewAdapter
-
-        }
+    private fun openFragment(fragment: Fragment) {
+        val transaction = supportFragmentManager.beginTransaction()
+        transaction.replace(R.id.container, fragment)
+        transaction.addToBackStack(null)
+        transaction.commit()
     }
-
-    private fun displayImagesInGallary( images: ArrayList<PhotoModel>) {
-        val intent = Intent(this@MainActivity, ImageGalleryActivity::class.java)
-        Log.d("Main", " images =  " + images.toString())
-        val bundle = Bundle()
-        bundle.putStringArrayList(ImageGalleryActivity.KEY_IMAGES, images.url())
-        bundle.putString(ImageGalleryActivity.KEY_TITLE, "Unsplash Images")
-        intent.putExtras(bundle)
-
-        startActivity(intent)
-    }
-
-    override fun onClick(albomId: Int) {
-        presenter.loadImagesToGallary(albomId)
-    }
-
-
-    override fun showAlbom(listAlbom: List<AlbomModel>) {
-        viewAdapter.myDataset = listAlbom as ArrayList<AlbomModel>
-        viewAdapter.notifyDataSetChanged()
-    }
-
-    override fun showGallary(photoList: List<PhotoModel>) {
-        displayImagesInGallary(photoList as ArrayList<PhotoModel>)
-    }
-
-    override fun showProgressBar() {
-        progressBar.visibility = View.VISIBLE
-        recyclerview2.visibility = View.GONE
-    }
-
-    override fun closeProgressBar() {
-        progressBar.visibility = View.GONE
-        recyclerview2.visibility = View.VISIBLE
-    }
-
-
-    override fun loadImageThumbnail(iv: ImageView?, imageUrl: String?, dimension: Int) {
-        if (!TextUtils.isEmpty(imageUrl)) {
-            Picasso.with(iv?.context)
-                    .load(imageUrl)
-                    .resize(dimension, dimension)
-                    .centerCrop()
-                    .into(iv)
-        } else {
-            iv?.setImageDrawable(null)
-        }
-    }
-
-    override fun loadFullScreenImage(iv: ImageView?, imageUrl: String?, width: Int, bglinearLayout: LinearLayout?) {
-        if (!TextUtils.isEmpty(imageUrl)) {
-            Picasso.with(iv?.context)
-                    .load(imageUrl)
-                    .resize(width, 0)
-                    .into(iv, object : Callback {
-                        override fun onSuccess() {
-                            val bitmap = (iv?.drawable as BitmapDrawable).bitmap
-                            Palette.from(bitmap).generate { palette -> applyPalette(palette, bglinearLayout!!) }
-                        }
-
-                        override fun onError() {
-
-                        }
-                    })
-        } else {
-            iv?.setImageDrawable(null)
-        }
-
-    }
-
-    private fun applyPalette(palette: Palette, viewGroup: ViewGroup) {
-        val bgColor = palette.getLightVibrantColor(0x000000);
-        if (bgColor != -1)
-            viewGroup.setBackgroundColor(bgColor)
-    }
-}
-
-private fun java.util.ArrayList<PhotoModel>.url(): java.util.ArrayList<String>? {
-    val url = ArrayList<String>()
-    this.forEach {
-        url.add(it.url)
-    }
-    return url
 }
