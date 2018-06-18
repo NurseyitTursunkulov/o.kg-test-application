@@ -1,4 +1,4 @@
-package com.example.nurseyit.gallerry.MainAvtivity
+package com.example.nurseyit.gallerry.MainAvtivity.Alboms
 
 import android.arch.lifecycle.LifecycleOwner
 

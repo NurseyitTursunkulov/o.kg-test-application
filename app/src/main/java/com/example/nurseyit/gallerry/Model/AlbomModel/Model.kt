@@ -1,8 +1,8 @@
-package com.example.nurseyit.gallerry.Model
+package com.example.nurseyit.gallerry.Model.AlbomModel
 
 interface Model {
-    fun getAlbomFromServer(callBack : Model.LoadAlbomCallBack)
-    fun getPhotoFromServer(id :Int, callBack: Model.LoadPhotoCallBack) : List<PhotoModel>?
+    fun getAlbomFromServer(callBack : LoadAlbomCallBack)
+    fun getPhotoFromServer(id :Int, callBack: LoadPhotoCallBack) : List<PhotoModel>?
 
     interface LoadAlbomCallBack{
         fun onAlbomsLoaded(alboms: ArrayList<AlbomModel>)

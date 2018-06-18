@@ -1,14 +1,11 @@
-package com.example.nurseyit.gallerry
+package com.example.nurseyit.gallerry.Model.AlbomModel
 
 
-import android.util.Log
 import androidx.work.Data
 import androidx.work.Worker
-import com.example.nurseyit.gallerry.Model.PhotoModel
 import com.google.gson.Gson
 import org.json.JSONArray
 import java.net.URL
-import java.util.*
 
 class BackgroundInternetPhotoWorker : Worker() {
 

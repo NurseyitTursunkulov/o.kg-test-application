@@ -1,7 +1,7 @@
-package com.example.nurseyit.gallerry.Presenter
+package com.example.nurseyit.gallerry.Presenter.AlbomPresenter
 
-import com.example.nurseyit.gallerry.Model.AlbomModel
-import com.example.nurseyit.gallerry.Model.PhotoModel
+import com.example.nurseyit.gallerry.Model.AlbomModel.AlbomModel
+import com.example.nurseyit.gallerry.Model.AlbomModel.PhotoModel
 
 interface AlbomContract {
     interface View {

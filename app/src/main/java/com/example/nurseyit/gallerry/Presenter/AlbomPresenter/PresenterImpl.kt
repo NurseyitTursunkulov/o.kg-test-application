@@ -1,9 +1,8 @@
-package com.example.nurseyit.gallerry.Presenter
+package com.example.nurseyit.gallerry.Presenter.AlbomPresenter
 
-import com.example.nurseyit.gallerry.Model.AlbomModel
-import com.example.nurseyit.gallerry.Model.Model
-import com.example.nurseyit.gallerry.Model.PhotoModel
-import com.example.nurseyit.gallerry.Presenter.AlbomContract
+import com.example.nurseyit.gallerry.Model.AlbomModel.AlbomModel
+import com.example.nurseyit.gallerry.Model.AlbomModel.Model
+import com.example.nurseyit.gallerry.Model.AlbomModel.PhotoModel
 
 class PresenterImpl(val view : AlbomContract.View, val model : Model) : AlbomContract.Presenter {
     override fun loadImagesToGallary(id :Int) {
@@ -21,7 +20,7 @@ class PresenterImpl(val view : AlbomContract.View, val model : Model) : AlbomCon
     }
 
     override fun loadAlbom() {
-         model.getAlbomFromServer(object :Model.LoadAlbomCallBack{
+         model.getAlbomFromServer(object : Model.LoadAlbomCallBack{
             override fun onAlbomsLoaded(alboms: ArrayList<AlbomModel>) {
                 view.closeProgressBar()
                 view.showAlbom(alboms)

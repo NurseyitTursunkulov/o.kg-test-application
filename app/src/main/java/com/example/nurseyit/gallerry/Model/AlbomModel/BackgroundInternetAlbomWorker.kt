@@ -1,11 +1,8 @@
-package com.example.nurseyit.gallerry
+package com.example.nurseyit.gallerry.Model.AlbomModel
 
-import android.util.Log
 import androidx.work.Data
 import androidx.work.Worker
-import com.google.gson.Gson
 import org.json.JSONArray
-import java.lang.Math.random
 import java.net.URL
 import java.util.*
 import kotlin.collections.ArrayList

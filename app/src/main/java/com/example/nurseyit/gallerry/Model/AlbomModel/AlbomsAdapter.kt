@@ -1,4 +1,4 @@
-package com.example.nurseyit.gallerry.Model
+package com.example.nurseyit.gallerry.Model.AlbomModel
 
 import android.support.v7.widget.RecyclerView
 import android.view.LayoutInflater

@@ -1,14 +1,12 @@
-package com.example.nurseyit.gallerry.Model
+package com.example.nurseyit.gallerry.Model.AlbomModel
 
 import android.arch.lifecycle.Observer
 import android.util.Log
 import androidx.work.*
-import com.example.nurseyit.gallerry.BackgroundInternetAlbomWorker
-import com.example.nurseyit.gallerry.BackgroundInternetPhotoWorker
-import com.example.nurseyit.gallerry.MainAvtivity.ownerInstance.lifecycleOwner
+import com.example.nurseyit.gallerry.MainAvtivity.Alboms.ownerInstance.lifecycleOwner
 import com.google.gson.Gson
 
-class RepositoryImpl : Model{
+class RepositoryImpl : Model {
     override fun getAlbomFromServer(callBack : Model.LoadAlbomCallBack) {
         var myConstraints = Constraints.Builder()
                 .setRequiredNetworkType(NetworkType.CONNECTED)

@@ -1,4 +1,4 @@
-package com.example.nurseyit.gallerry.MainAvtivity
+package com.example.nurseyit.gallerry.MainAvtivity.Alboms
 
 import com.etiennelawlor.imagegallery.library.activities.FullScreenImageGalleryActivity
 import com.etiennelawlor.imagegallery.library.activities.ImageGalleryActivity
