@@ -34,7 +34,7 @@ class MainActivity : AppCompatActivity(), ImageGalleryAdapter.ImageThumbnailLoad
 
 
     lateinit var viewAdapter: AlbomsAdapter
-    lateinit var viewManager: LinearLayoutManager
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -49,7 +49,7 @@ class MainActivity : AppCompatActivity(), ImageGalleryAdapter.ImageThumbnailLoad
 
 
     private fun initRecycleView() {
-        viewManager = LinearLayoutManager(this)
+       val viewManager = LinearLayoutManager(this)
         viewAdapter = AlbomsAdapter(this)
         recyclerview2.apply {
             setHasFixedSize(true)
