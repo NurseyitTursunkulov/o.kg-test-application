@@ -18,7 +18,7 @@
             android:label=""
             android:theme="@style/Theme.ImageGallery" />
         <activity
-            android:name=".MainActivity"
+            android:name=".MainAvtivity.MainActivity"
             android:configChanges="orientation|keyboardHidden|screenSize">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -33,7 +33,8 @@
         <activity
             android:name=".AlbomsActivity"
             android:label="@string/title_activity_alboms"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar" />
+        <activity android:name=".MainAvtivity.Posts.CommentsActivity"></activity>
     </application>
 
 </manifest>
